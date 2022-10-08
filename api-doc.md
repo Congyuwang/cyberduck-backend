@@ -112,4 +112,4 @@ sequenceDiagram
 ```
 
 login page 由后端处理。前端负责以下逻辑：
-请求如果遇到401，则POST到
+请求如果遇到401，跳转到`https://sso.forkingpark.xyz/login?redirect_url=本来的前端URL`
