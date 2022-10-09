@@ -1,0 +1,2 @@
+[alias]
+prisma = "run --release -p prisma-cli --"
