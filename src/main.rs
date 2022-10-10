@@ -31,7 +31,9 @@ async fn main() -> Result<()> {
         .create(true)
         .append(true)
         .open(&SERVER_CONFIG.log_file)?;
-    let log_to_file = tracing_subscriber::fmt::layer().with_writer(log_file);
+    let log_to_file = tracing_subscriber::fmt::layer()
+        .with_ansi(false)
+        .with_writer(log_file);
     // tracing
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
