@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     // tracing
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("RUST_LOG").unwrap_or_else(|_| "wechat_login=info".into()),
+            std::env::var("RUST_LOG").unwrap_or_else(|_| "cyberduck_backend=info".into()),
         ))
         .with(stdout_log)
         .with(log_to_file)
