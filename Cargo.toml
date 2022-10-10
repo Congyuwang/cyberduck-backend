@@ -9,19 +9,20 @@ axum = "0.5.16"
 config = "0.13.2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-oauth2 = "4.2.3"
 anyhow = "1.0.65"
 serde = "1.0.145"
 lazy_static = "1.4.0"
 axum-server = { version = "0.4.2", features = ["tls-rustls"] }
-redis = { version = "0.21.6", features = ["tokio-comp"] }
-axum_database_sessions = { version = "4.1.0", features = ["redis-db"] }
+redis = { version = "0.21", features = ["tokio-comp"] }
+axum_database_sessions = { version = "4", features = ["redis-db"] }
 time = "=0.1.44"
-base64 = "0.13.0"
+base64 = "0.13"
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.1" }
-serde_json = "1.0.85"
-url = "2.3.1"
-axum-auth = "0.3.0"
+serde_json = "1"
+url = { version = "2", features = ["serde"] }
+axum-auth = "^0.3"
+rand = "0.8.5"
+reqwest = { version = "0.11.12", features = ["json"] }
 
 [workspace]
 members = [

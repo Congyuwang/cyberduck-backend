@@ -33,7 +33,7 @@
 
 ### 获取进度
 
-```GET https://sso.forkingpark.cn/api/progress```
+```GET https://sso.forkingpark.cn/api/user-info```
 
 #### 响应
 成功状态(200)
@@ -55,15 +55,7 @@ login please
 
 ### 发现新鸭子
 
-```POST https://sso.forkingpark.cn/api/duck```
-
-body
-
-```json
-{
-  "duck_id": "duck-id"
-}
-```
+```GET https://sso.forkingpark.cn/api/find-duck/{duck-id}```
 
 #### 响应
 - 成功状态(200)

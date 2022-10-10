@@ -1,6 +1,6 @@
 //! pubic api to query user states
 use crate::db_api::DB;
-use crate::prisma::{duck, user};
+use crate::prisma::{duck, duck_history, user};
 
 user::select! { user_info {
     id
@@ -12,6 +12,8 @@ user::select! { user_info {
             id
             title
             story
+            location
+            topics
             duck_icon_url
             is_hidden
             related_exhibit: select {
@@ -23,8 +25,8 @@ user::select! { user_info {
             next_duck_story: select {
                 id
                 title
-                story
-                duck_icon_url
+                location
+                topics
                 is_hidden
             }
         }
@@ -54,7 +56,9 @@ impl DB {
         wechat_openid: String,
         duck_id: String,
     ) -> anyhow::Result<user_info::Data> {
-        self.0
+        // try creating new user if wechat_openid is new
+        let user = self
+            .0
             .user()
             .upsert(
                 user::UniqueWhereParam::WechatOpenIdEquals(wechat_openid.clone()),
@@ -63,11 +67,19 @@ impl DB {
             )
             .exec()
             .await?;
+        // create new record if no record exists
         self.0
             .duck_history()
-            .create(
-                user::UniqueWhereParam::WechatOpenIdEquals(wechat_openid.clone()),
-                duck::UniqueWhereParam::IdEquals(duck_id),
+            .upsert(
+                duck_history::UniqueWhereParam::UserIdDuckIdEquals(
+                    user.id.clone(),
+                    duck_id.clone(),
+                ),
+                (
+                    user::UniqueWhereParam::IdEquals(user.id),
+                    duck::UniqueWhereParam::IdEquals(duck_id),
+                    vec![],
+                ),
                 vec![],
             )
             .exec()

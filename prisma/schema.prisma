@@ -23,6 +23,9 @@ model DuckHistory {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   duckId    String   @db.ObjectId
   duck      Duck     @relation(fields: [duckId], references: [id], onDelete: Cascade)
+
+  // allow only recording
+  @@unique([userId, duckId])
 }
 
 model Duck {
@@ -33,6 +36,8 @@ model Duck {
   // duck meta info
   title          Json
   story          Json
+  location       Json
+  topics         Json
   duckIconURL    String
   isHidden       Boolean  @default(false)
   relatedExhibit Exhibit?
