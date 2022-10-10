@@ -47,8 +47,7 @@ impl WechatLogin {
 
     pub async fn request_id(&self, code: &str) -> anyhow::Result<CodeResponse> {
         let url = self.open_id_url(code);
-        let client = reqwest::Client::new();
-        let rsp = client.get(url).send().await?.json::<CodeResponse>().await?;
+        let rsp = reqwest::get(url).await?.json::<CodeResponse>().await?;
         Ok(rsp)
     }
 

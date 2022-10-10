@@ -22,7 +22,7 @@ serde_json = "1"
 url = { version = "2", features = ["serde"] }
 axum-auth = "^0.3"
 rand = "0.8.5"
-reqwest = { version = "0.11.12", default-features = false, features = ["json", "tokio-rustls"] }
+reqwest = { version = "0.11.12", features = ["json"] }
 
 [workspace]
 members = [
