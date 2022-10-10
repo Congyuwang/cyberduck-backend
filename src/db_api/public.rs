@@ -2,6 +2,13 @@
 use crate::db_api::DB;
 use crate::prisma::{duck, duck_history, user};
 
+duck::select! { duck_preview {
+    title
+    location
+    topics
+    is_hidden
+}}
+
 user::select! { user_info {
     id
     created_at
@@ -35,6 +42,17 @@ user::select! { user_info {
 
 impl DB {
     // C/R
+
+    pub async fn preview_ducks(&self) -> anyhow::Result<Vec<duck_preview::Data>> {
+        let data = self
+            .0
+            .duck()
+            .find_many(vec![])
+            .select(duck_preview::select())
+            .exec()
+            .await?;
+        Ok(data)
+    }
 
     pub async fn upsert_user_info(&self, wechat_openid: String) -> anyhow::Result<user_info::Data> {
         let data = self

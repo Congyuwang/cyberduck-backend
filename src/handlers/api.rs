@@ -129,9 +129,15 @@ pub async fn find_duck(
     Path(duck_id): Path<String>,
 ) -> Response {
     if let Some(wechat_openid) = check_login(&session).await {
-        match db.record_duck_view(wechat_openid.clone(), duck_id).await {
+        match db
+            .record_duck_view(wechat_openid.clone(), duck_id.clone())
+            .await
+        {
             Ok(data) => {
-                info!("user info request success: openid={}", wechat_openid);
+                info!(
+                    "user (openid: {}) find duck (duck_id: {})",
+                    wechat_openid, duck_id
+                );
                 Json(data).into_response()
             }
             Err(e) => {
@@ -141,6 +147,17 @@ pub async fn find_duck(
         }
     } else {
         (StatusCode::FORBIDDEN, "please login first").into_response()
+    }
+}
+
+/// GET api/preview-ducks
+pub async fn preview_ducks(Extension(db): Extension<DB>) -> Response {
+    match db.preview_ducks().await {
+        Ok(data) => Json(data).into_response(),
+        Err(e) => {
+            error!("error previewing ducks: {}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, "error previewing ducks").into_response()
+        }
     }
 }
 

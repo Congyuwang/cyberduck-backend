@@ -85,6 +85,7 @@ async fn main() -> Result<()> {
 
     let api = Router::new()
         .route("/user-info", get(api::user_info))
+        .route("/preview-ducks", get(api::preview_ducks))
         .route("/find-duck/:duck_id", get(api::find_duck));
 
     let callback_path = &SERVER_CONFIG.wechat.redirect_uri.path();
