@@ -1,10 +1,11 @@
 use crate::db_api::ducks::{NewDuckData, UpdateDuckData};
 use crate::{DB, SERVER_CONFIG};
-use axum::extract::Path;
+use axum::extract::{Path, Query};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::{Extension, Json};
 use axum_auth::AuthBearer;
+use serde::Deserialize;
 use serde_json::json;
 use tracing::error;
 
@@ -119,6 +120,37 @@ pub async fn get_all_ducks(
             Err(e) => {
                 error!("error getting ducks: {}", e);
                 (StatusCode::INTERNAL_SERVER_ERROR, "error getting ducks").into_response()
+            }
+        }
+    } else {
+        (StatusCode::UNAUTHORIZED, "provide admin token").into_response()
+    }
+}
+
+#[derive(Deserialize)]
+pub struct DeleteDuckHistoryParam {
+    user_id: String,
+}
+
+/// DELETE admin/duck-history/dangerous?user_id=USER_ID
+pub async fn delete_duck_history(
+    AuthBearer(token): AuthBearer,
+    Extension(db): Extension<DB>,
+    Query(params): Query<DeleteDuckHistoryParam>,
+) -> Response {
+    if token.eq(&SERVER_CONFIG.admin_token) {
+        match db.delete_duck_history(params.user_id).await {
+            Ok(rsp) => Json(json!({
+                "number_of_duck_view_records_deleted": rsp,
+            }))
+            .into_response(),
+            Err(e) => {
+                error!("error deleting duck history: {}", e);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "error deleting ducks history",
+                )
+                    .into_response()
             }
         }
     } else {

@@ -1,6 +1,6 @@
 //! admin api to manage ducks
 use crate::db_api::{Bilingual, DB};
-use crate::prisma::{duck, exhibit};
+use crate::prisma::{duck, duck_history, exhibit};
 use serde::Deserialize;
 
 /// query struct for POST request
@@ -195,6 +195,16 @@ impl DB {
             .0
             .duck()
             .delete(duck::UniqueWhereParam::IdEquals(id))
+            .exec()
+            .await?;
+        Ok(data)
+    }
+
+    pub async fn delete_duck_history(&self, user_id: String) -> anyhow::Result<i64> {
+        let data = self
+            .0
+            .duck_history()
+            .delete_many(vec![duck_history::WhereParam::UserIdEquals(user_id)])
             .exec()
             .await?;
         Ok(data)

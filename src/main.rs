@@ -63,6 +63,10 @@ async fn main() -> Result<()> {
             get(ducks::get_all_ducks).post(ducks::create_many_ducks),
         )
         .route("/many-ducks/dangerous", delete(ducks::delete_all_ducks))
+        .route(
+            "/duck-history/dangerous",
+            delete(ducks::delete_duck_history),
+        )
         .route("/exhibit", post(exhibits::create_exhibit))
         .route(
             "/exhibit/:id",
