@@ -118,7 +118,7 @@ pub async fn user_info(session: Session, Extension(db): Extension<DB>) -> Respon
             }
         }
     } else {
-        (StatusCode::FORBIDDEN, "please login first").into_response()
+        (StatusCode::UNAUTHORIZED, "please login first").into_response()
     }
 }
 
@@ -146,7 +146,7 @@ pub async fn find_duck(
             }
         }
     } else {
-        (StatusCode::FORBIDDEN, "please login first").into_response()
+        (StatusCode::UNAUTHORIZED, "please login first").into_response()
     }
 }
 
