@@ -1,6 +1,6 @@
 //! admin api to manage ducks
 use crate::db_api::{Bilingual, DB};
-use crate::prisma::{duck, duck_history, exhibit};
+use crate::prisma::{duck, duck_history, exhibit, location};
 use serde::Deserialize;
 
 /// query struct for POST request
@@ -9,11 +9,11 @@ use serde::Deserialize;
 pub struct NewDuckData {
     title: Bilingual,
     story: Bilingual,
-    location: Bilingual,
     topics: Vec<Bilingual>,
     duck_icon_url: String,
     #[serde(default)]
     is_hidden: bool,
+    location_id: Option<String>,
     related_exhibit_id: Option<String>,
     prev_duck_story_id: Option<String>,
 }
@@ -24,10 +24,10 @@ pub struct NewDuckData {
 pub struct UpdateDuckData {
     title: Option<Bilingual>,
     story: Option<Bilingual>,
-    location: Option<Bilingual>,
     topics: Option<Vec<Bilingual>>,
     duck_icon_url: Option<String>,
     is_hidden: Option<bool>,
+    location_id: Option<String>,
     related_exhibit_id: Option<String>,
     prev_duck_story_id: Option<String>,
 }
@@ -39,11 +39,15 @@ impl NewDuckData {
         serde_json::Value,
         serde_json::Value,
         serde_json::Value,
-        serde_json::Value,
         String,
         Vec<duck::SetParam>,
     )> {
         let mut params = vec![];
+        if let Some(location_id) = self.location_id {
+            params.push(duck::SetParam::ConnectLocation(
+                location::UniqueWhereParam::IdEquals(location_id),
+            ));
+        }
         if let Some(prev_duck_story_id) = self.prev_duck_story_id {
             params.push(duck::SetParam::ConnectPrevDuckStory(
                 duck::UniqueWhereParam::IdEquals(prev_duck_story_id),
@@ -58,7 +62,6 @@ impl NewDuckData {
         Ok((
             serde_json::to_value(self.title)?,
             serde_json::to_value(self.story)?,
-            serde_json::to_value(self.location)?,
             serde_json::to_value(self.topics)?,
             self.duck_icon_url.to_string(),
             params,
@@ -75,17 +78,19 @@ impl UpdateDuckData {
         if let Some(story) = self.story {
             params.push(duck::SetParam::SetStory(serde_json::to_value(story)?));
         }
-        if let Some(location) = self.location {
-            params.push(duck::SetParam::SetLocation(serde_json::to_value(location)?));
-        }
         if let Some(topics) = self.topics {
-            params.push(duck::SetParam::SetLocation(serde_json::to_value(topics)?));
+            params.push(duck::SetParam::SetTopics(serde_json::to_value(topics)?));
         }
         if let Some(duck_icon_url) = self.duck_icon_url {
             params.push(duck::SetParam::SetDuckIconUrl(duck_icon_url));
         }
         if let Some(is_hidden) = self.is_hidden {
             params.push(duck::SetParam::SetIsHidden(is_hidden));
+        }
+        if let Some(location_id) = self.location_id {
+            params.push(duck::SetParam::ConnectLocation(
+                location::UniqueWhereParam::IdEquals(location_id),
+            ));
         }
         if let Some(prev_duck_story_id) = self.prev_duck_story_id {
             params.push(duck::SetParam::ConnectPrevDuckStory(
@@ -106,7 +111,10 @@ duck::select! { duck_info {
     id
     title
     story
-    location
+    location: select {
+        id
+        description
+    }
     topics
     duck_icon_url
     is_hidden
@@ -129,11 +137,11 @@ impl DB {
     // C
 
     pub async fn create_duck(&self, data: NewDuckData) -> anyhow::Result<duck::Data> {
-        let (title, story, location, topics, duck_icon_url, params) = data.into_db_data()?;
+        let (title, story, topics, duck_icon_url, params) = data.into_db_data()?;
         let data = self
             .0
             .duck()
-            .create(title, story, location, topics, duck_icon_url, params)
+            .create(title, story, topics, duck_icon_url, params)
             .exec()
             .await?;
         Ok(data)

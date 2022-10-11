@@ -4,7 +4,9 @@ use crate::prisma::{duck, duck_history, user};
 
 duck::select! { duck_preview {
     title
-    location
+    location: select {
+        id
+    }
     topics
     is_hidden
 }}
@@ -19,7 +21,10 @@ user::select! { user_info {
             id
             title
             story
-            location
+            location: select {
+                id
+                description
+            }
             topics
             duck_icon_url
             is_hidden

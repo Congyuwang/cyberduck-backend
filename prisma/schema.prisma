@@ -36,10 +36,10 @@ model Duck {
   // duck meta info
   title          Json
   story          Json
-  location       Json
+  location       Location?
   topics         Json
-  duckIconURL    String
-  isHidden       Boolean  @default(false)
+  duckIconUrl    String
+  isHidden       Boolean   @default(false)
   relatedExhibit Exhibit?
 
   // history of duck being viewed
@@ -49,6 +49,13 @@ model Duck {
   nextDuckStory   Duck?   @relation("StorySequence")
   prevDuckStory   Duck?   @relation("StorySequence", fields: [prevDuckStoryId], references: [id], onUpdate: NoAction, onDelete: NoAction)
   prevDuckStoryId String? @unique @db.ObjectId
+}
+
+model Location {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  description Json
+  duckId      String? @unique @db.ObjectId
+  duck        Duck?   @relation(fields: [duckId], references: [id])
 }
 
 model Exhibit {

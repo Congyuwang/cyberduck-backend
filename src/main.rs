@@ -6,7 +6,7 @@ mod redis_session_layer;
 mod wechat_login;
 
 use crate::db_api::DB;
-use crate::handlers::{api, ducks, exhibits};
+use crate::handlers::{api, ducks, exhibits, locations};
 use anyhow::Result;
 use axum::routing::{delete, get, post};
 use axum::{Extension, Router};
@@ -81,6 +81,21 @@ async fn main() -> Result<()> {
         .route(
             "/many-exhibits/dangerous",
             delete(exhibits::delete_all_exhibits),
+        )
+        .route("/location", post(locations::create_location))
+        .route(
+            "/location/:id",
+            get(locations::get_location)
+                .patch(locations::update_location)
+                .delete(locations::delete_location),
+        )
+        .route(
+            "/many-locations",
+            get(locations::get_all_locations).post(locations::create_many_locations),
+        )
+        .route(
+            "/many-locations/dangerous",
+            delete(locations::delete_all_locations),
         );
 
     let api = Router::new()

@@ -1,5 +1,6 @@
 pub mod ducks;
 pub mod exhibits;
+pub mod locations;
 pub mod public;
 
 use crate::prisma::{new_client_with_url, PrismaClient};
