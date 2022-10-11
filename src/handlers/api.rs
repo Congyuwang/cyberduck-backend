@@ -142,7 +142,7 @@ pub async fn find_duck(
             }
             Err(e) => {
                 error!("error recording duck view: {}", e);
-                (StatusCode::BAD_REQUEST, "error recording duck view").into_response()
+                (StatusCode::NOT_FOUND, "error recording duck view").into_response()
             }
         }
     } else {

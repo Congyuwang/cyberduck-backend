@@ -59,7 +59,7 @@ pub async fn update_location(
             Ok(rsp) => Json(rsp).into_response(),
             Err(e) => {
                 error!("error updating location: {}", e);
-                (StatusCode::BAD_REQUEST, "error updating location").into_response()
+                (StatusCode::NOT_FOUND, "error updating location").into_response()
             }
         }
     } else {
@@ -78,7 +78,7 @@ pub async fn delete_location(
             Ok(rsp) => Json(rsp).into_response(),
             Err(e) => {
                 error!("error deleting location: {}", e);
-                (StatusCode::BAD_REQUEST, "error deleting location").into_response()
+                (StatusCode::NOT_FOUND, "error deleting location").into_response()
             }
         }
     } else {

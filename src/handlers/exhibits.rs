@@ -59,7 +59,7 @@ pub async fn update_exhibit(
             Ok(rsp) => Json(rsp).into_response(),
             Err(e) => {
                 error!("error updating exhibit: {}", e);
-                (StatusCode::BAD_REQUEST, "error updating exhibit").into_response()
+                (StatusCode::NOT_FOUND, "error updating exhibit").into_response()
             }
         }
     } else {
@@ -78,7 +78,7 @@ pub async fn delete_exhibit(
             Ok(rsp) => Json(rsp).into_response(),
             Err(e) => {
                 error!("error deleting exhibit: {}", e);
-                (StatusCode::BAD_REQUEST, "error deleting exhibit").into_response()
+                (StatusCode::NOT_FOUND, "error deleting exhibit").into_response()
             }
         }
     } else {

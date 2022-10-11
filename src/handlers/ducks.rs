@@ -60,7 +60,7 @@ pub async fn update_duck(
             Ok(rsp) => Json(rsp).into_response(),
             Err(e) => {
                 error!("error updating duck: {}", e);
-                (StatusCode::BAD_REQUEST, "error updating duck").into_response()
+                (StatusCode::NOT_FOUND, "error updating duck").into_response()
             }
         }
     } else {
@@ -79,7 +79,7 @@ pub async fn delete_duck(
             Ok(rsp) => Json(rsp).into_response(),
             Err(e) => {
                 error!("error deleting duck: {}", e);
-                (StatusCode::BAD_REQUEST, "error deleting duck").into_response()
+                (StatusCode::NOT_FOUND, "error deleting duck").into_response()
             }
         }
     } else {
