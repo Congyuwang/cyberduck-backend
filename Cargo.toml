@@ -22,6 +22,8 @@ url = { version = "2", features = ["serde"] }
 axum-auth = "^0.3"
 rand = "0.8.5"
 reqwest = { version = "0.11.12", features = ["json"] }
+tower-http = { version = "0.3.4", features = ["cors"] }
+http = "0.2.8"
 
 [dependencies.prisma-client-rust]
 git = "https://github.com/Congyuwang/prisma-client-rust"

@@ -12,8 +12,10 @@ use axum::routing::{delete, get, post};
 use axum::{Extension, Router};
 use axum_server::tls_rustls::RustlsConfig;
 use configuration::Configuration;
+use http::{HeaderValue, Method};
 use std::fs::OpenOptions;
 use std::net::SocketAddr;
+use tower_http::cors::{AllowOrigin, CorsLayer};
 use tracing_subscriber::prelude::*;
 
 #[macro_use]
@@ -98,10 +100,18 @@ async fn main() -> Result<()> {
             delete(locations::delete_all_locations),
         );
 
+    let api_cors_layer = CorsLayer::new()
+        .allow_credentials(true)
+        .allow_methods([Method::GET])
+        .allow_origin(AllowOrigin::exact(
+            HeaderValue::from_str(SERVER_CONFIG.allow_origin.as_str()).unwrap(),
+        ));
+
     let api = Router::new()
         .route("/user-info", get(api::user_info))
         .route("/preview-ducks", get(api::preview_ducks))
-        .route("/find-duck/:duck_id", get(api::find_duck));
+        .route("/find-duck/:duck_id", get(api::find_duck))
+        .layer(api_cors_layer);
 
     let callback_path = &SERVER_CONFIG.wechat.redirect_uri.path();
     let app = Router::new()

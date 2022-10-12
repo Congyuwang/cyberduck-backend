@@ -15,6 +15,7 @@ pub struct Configuration {
     pub wechat: WechatLogin,
     pub server_tls: Option<TlsConfig>,
     pub db_url: String,
+    pub allow_origin: String,
 }
 
 #[derive(Deserialize)]
