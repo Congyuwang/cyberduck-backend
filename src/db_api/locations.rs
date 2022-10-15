@@ -1,13 +1,20 @@
 //! admin api to manage locations
 use crate::db_api::{Bilingual, DB};
 use crate::prisma::{duck, location};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize)]
+pub struct Coordinate {
+    x: String,
+    y: String,
+}
 
 /// query struct for POST request
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewLocationData {
     description: Bilingual,
+    coordinate: Coordinate,
     duck_id: Option<String>,
 }
 
@@ -16,18 +23,29 @@ pub struct NewLocationData {
 #[serde(rename_all = "camelCase")]
 pub struct UpdateLocationData {
     description: Option<Bilingual>,
+    coordinate: Option<Coordinate>,
     duck_id: Option<String>,
 }
 
 impl NewLocationData {
-    fn into_db_data(self) -> anyhow::Result<(serde_json::Value, Vec<location::SetParam>)> {
+    fn into_db_data(
+        self,
+    ) -> anyhow::Result<(
+        serde_json::Value,
+        serde_json::Value,
+        Vec<location::SetParam>,
+    )> {
         let mut params = Vec::with_capacity(1);
         if let Some(duck_id) = self.duck_id {
             params.push(location::SetParam::ConnectDuck(
                 duck::UniqueWhereParam::IdEquals(duck_id),
             ));
         }
-        Ok((serde_json::to_value(self.description)?, params))
+        Ok((
+            serde_json::to_value(self.description)?,
+            serde_json::to_value(self.coordinate)?,
+            params,
+        ))
     }
 }
 
@@ -37,6 +55,11 @@ impl UpdateLocationData {
         if let Some(description) = self.description {
             params.push(location::SetParam::SetDescription(serde_json::to_value(
                 description,
+            )?));
+        }
+        if let Some(coordinate) = self.coordinate {
+            params.push(location::SetParam::SetCoordinate(serde_json::to_value(
+                coordinate,
             )?));
         }
         if let Some(duck_id) = self.duck_id {
@@ -52,8 +75,13 @@ impl DB {
     // C
 
     pub async fn create_location(&self, data: NewLocationData) -> anyhow::Result<location::Data> {
-        let (location, _) = data.into_db_data()?;
-        let data = self.0.location().create(location, vec![]).exec().await?;
+        let (location, coordinate, _) = data.into_db_data()?;
+        let data = self
+            .0
+            .location()
+            .create(location, coordinate, vec![])
+            .exec()
+            .await?;
         Ok(data)
     }
 

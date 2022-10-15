@@ -54,6 +54,7 @@ model Duck {
 model Location {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
   description Json
+  coordinate  Json
   duckId      String? @unique @db.ObjectId
   duck        Duck?   @relation(fields: [duckId], references: [id])
 }
