@@ -5,6 +5,7 @@ use crate::prisma::{duck, duck_history, user};
 duck::select! { duck_preview {
     title
     location: select {
+        id
         coordinate
     }
     topics
@@ -22,6 +23,7 @@ user::select! { user_info {
             title
             story
             location: select {
+                id
                 coordinate
                 description
             }
@@ -38,6 +40,7 @@ user::select! { user_info {
                 id
                 title
                 location: select {
+                    id
                     coordinate
                 }
                 topics
