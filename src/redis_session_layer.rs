@@ -23,7 +23,7 @@ impl RedisSessionConfig {
         let session_config = AxumSessionConfig::default()
             .with_cookie_name(&SERVER_CONFIG.redis_session.cookie_name)
             .with_always_save(false)
-            .with_cookie_same_site(SameSite::Lax)
+            .with_cookie_same_site(SameSite::Strict)
             .with_http_only(true)
             .with_lifetime(Duration::seconds(self.session_expiration))
             .with_secure(true)
