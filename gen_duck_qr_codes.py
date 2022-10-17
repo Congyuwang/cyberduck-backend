@@ -64,18 +64,16 @@ if __name__ == '__main__':
     ducks = [duck_info(dd) for dd in request_all_ducks(args.endpoint, args.token)]
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     for duck in ducks:
-        qr = qrcode.QRCode(
-            box_size=15,
-            border=2,
-            error_correction=qrcode.ERROR_CORRECT_H
-        )
+        qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_H)
         duck_url = ducks_endpoint(args.frontend, duck["id"])
         print(duck_url)
         qr.add_data(duck_url)
         qr.make(fit=True)
-        qr_img = qr.make_image()
-        icon = get_icon(duck["icon"])
-        pos = int(qr_img.pixel_size / 2 - icon.width / 2)
-        Image.Image.paste(qr_img, icon, (pos, pos))
+        qr_img: Image.Image = qr.make_image().get_image()
+        qr_img = qr_img.convert(mode="RGBA")
+        icon = get_icon(duck["icon"]).convert(mode="RGBA")
+        pos = int(qr_img.width / 2 - icon.width / 2)
+        mask = icon.getchannel("A").convert(mode="1")
+        Image.Image.paste(qr_img, icon, (pos, pos), mask=mask)
         with open(Path(OUTPUT_DIR) / f"{duck['name']}({duck['loc']}).png", "wb") as fp:
             qr_img.save(fp)
