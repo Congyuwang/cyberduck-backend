@@ -2,3 +2,4 @@
 # yaml文件内有密钥，小心！
 *.yaml
 .idea
+qrcodes
