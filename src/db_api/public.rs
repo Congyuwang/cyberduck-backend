@@ -7,6 +7,7 @@ duck::select! { duck_preview {
     location: select {
         id
         coordinate
+        description
     }
     topics
     is_hidden
