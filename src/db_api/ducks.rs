@@ -1,7 +1,8 @@
 //! admin api to manage ducks
 use crate::db_api::{Bilingual, DB};
-use crate::prisma::{duck, duck_history, exhibit, location};
+use crate::prisma::{duck, duck_history, exhibit, location, user};
 use serde::Deserialize;
+use crate::prisma::user::Data;
 
 /// query struct for POST request
 #[derive(Deserialize)]
@@ -209,6 +210,20 @@ impl DB {
     }
 
     pub async fn delete_duck_history(&self, user_id: String) -> anyhow::Result<i64> {
+
+        // attempt to find user by wechat id
+        let user_by_wechat = self
+            .0
+            .user()
+            .find_unique(user::UniqueWhereParam::WechatOpenIdEquals(user_id.clone()))
+            .exec()
+            .await?;
+
+        let user_id = match user_by_wechat {
+            None => user_id,
+            Some(user) => user.id,
+        };
+
         let data = self
             .0
             .duck_history()
