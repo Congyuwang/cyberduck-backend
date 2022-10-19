@@ -1,6 +1,5 @@
 //! admin api to manage ducks
 use crate::db_api::{Bilingual, DB};
-use crate::prisma::user::Data;
 use crate::prisma::{duck, duck_history, exhibit, location, user};
 use serde::Deserialize;
 
