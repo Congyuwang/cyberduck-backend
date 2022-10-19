@@ -6,6 +6,7 @@ use axum::response::{IntoResponse, Redirect, Response};
 use axum::{Extension, Json};
 use axum_database_sessions::{AxumRedisPool, AxumSession};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use tracing::{error, info};
 use url::Url;
 
@@ -113,6 +114,25 @@ pub async fn user_info(session: Session, Extension(db): Extension<DB>) -> Respon
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "error getting or creating user",
+                )
+                    .into_response()
+            }
+        }
+    } else {
+        (StatusCode::UNAUTHORIZED, "please login first").into_response()
+    }
+}
+
+/// DELETE api/user-info
+pub async fn clear_history(session: Session, Extension(db): Extension<DB>) -> Response {
+    if let Some(wechat_openid) = check_login(&session).await {
+        match db.delete_duck_history(wechat_openid).await {
+            Ok(n) => Json(json!({ "number_of_records_removed": n })).into_response(),
+            Err(e) => {
+                error!("error removing game history: {}", e);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "error removing game history",
                 )
                     .into_response()
             }

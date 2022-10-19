@@ -108,7 +108,7 @@ async fn main() -> Result<()> {
         ));
 
     let api = Router::new()
-        .route("/user-info", get(api::user_info))
+        .route("/user-info", get(api::user_info).delete(api::clear_history))
         .route("/preview-ducks", get(api::preview_ducks))
         .route("/find-duck/:duck_id", get(api::find_duck))
         .layer(api_cors_layer);
