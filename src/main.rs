@@ -102,7 +102,7 @@ async fn main() -> Result<()> {
 
     let api_cors_layer = CorsLayer::new()
         .allow_credentials(true)
-        .allow_methods([Method::GET])
+        .allow_methods([Method::GET, Method::DELETE])
         .allow_origin(AllowOrigin::exact(
             HeaderValue::from_str(SERVER_CONFIG.allow_origin.as_str()).unwrap(),
         ));
