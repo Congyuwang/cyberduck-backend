@@ -43,6 +43,7 @@ user::select! { user_info {
                 location: select {
                     id
                     coordinate
+                    description
                 }
                 topics
                 is_hidden
