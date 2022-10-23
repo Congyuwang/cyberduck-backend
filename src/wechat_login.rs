@@ -11,6 +11,7 @@ pub static STATE_LENGTH: usize = 64;
 #[derive(Deserialize)]
 pub struct WechatLogin {
     appid: String,
+    appname: String,
     secret: String,
     pub redirect_uri: Url,
 }
@@ -54,7 +55,7 @@ impl WechatLogin {
     fn open_id_url(&self, code: &str) -> Url {
         let mut url = Url::parse(TOKEN_URL).unwrap();
         url.query_pairs_mut()
-            .append_pair("appid", &self.appid)
+            .append_pair("appid", &self.appname)
             .append_pair("secret", &self.secret)
             .append_pair("code", code)
             .append_pair("grant_type", "authorization_code");
