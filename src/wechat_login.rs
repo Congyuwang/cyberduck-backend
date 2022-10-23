@@ -4,7 +4,7 @@ use serde::Deserialize;
 use url::Url;
 
 pub static AUTH_URL: &str = "https://open.weixin.qq.com/connect/oauth2/authorize";
-pub static TOKEN_URL: &str = "https://api.weixin.qq.com/sns/oauth2/access_token";
+pub static TOKEN_URL: &str = "https://api.sunneversets.cn/sns/oauth2/access_token";
 pub static SNSAPI_BASE: &str = "snsapi_base";
 pub static STATE_LENGTH: usize = 64;
 
