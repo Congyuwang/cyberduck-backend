@@ -8,14 +8,16 @@ mod wechat_login;
 use crate::db_api::DB;
 use crate::handlers::{api, ducks, exhibits, locations};
 use anyhow::Result;
-use axum::routing::{delete, get, post};
+use axum::response::{IntoResponse, Response};
+use axum::routing::{delete, get, get_service, post};
 use axum::{Extension, Router};
 use axum_server::tls_rustls::RustlsConfig;
 use configuration::Configuration;
-use http::{HeaderValue, Method};
+use http::{HeaderValue, Method, StatusCode};
 use std::fs::OpenOptions;
 use std::net::SocketAddr;
 use tower_http::cors::{AllowOrigin, CorsLayer};
+use tower_http::services::ServeDir;
 use tracing_subscriber::prelude::*;
 
 #[macro_use]
@@ -119,6 +121,11 @@ async fn main() -> Result<()> {
         .nest("/api", api)
         .route("/login", get(api::login))
         .route(callback_path, get(api::login_callback))
+        .fallback(
+            // serve static files
+            get_service(ServeDir::new("public"))
+                .handle_error(|_| async move { internal_error("static file error") }),
+        )
         .layer(Extension(db))
         .layer(session);
 
@@ -137,4 +144,9 @@ async fn main() -> Result<()> {
             .await?
     };
     Ok(())
+}
+
+#[inline]
+pub fn internal_error(reason: &'static str) -> Response {
+    (StatusCode::INTERNAL_SERVER_ERROR, reason).into_response()
 }
