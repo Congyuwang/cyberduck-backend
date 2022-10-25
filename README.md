@@ -40,6 +40,7 @@ redis_session:
 
 # WeChat config
 wechat:
+  appname: "app-id-used-in-sunneversets-service"
   appid: "wechat-app-id-for-login"
   secret: "wechat-secret-for-login"
   redirect_uri: "https://your-backend/login/callback"
