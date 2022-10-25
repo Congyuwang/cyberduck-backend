@@ -12,6 +12,7 @@ use url::Url;
 
 const WECHAT_ID_KEY: &str = "wechat_openid";
 const LOGIN_STATE_KEY: &str = "login_state";
+const DUCK_COUNT_THRESHOLD: usize = 10;
 
 pub type Session = AxumSession<AxumRedisPool>;
 
@@ -158,6 +159,13 @@ pub async fn find_duck(
                     "user (openid: {}) find duck (duck_id: {})",
                     wechat_openid, duck_id
                 );
+                if data.duck_history.len() == DUCK_COUNT_THRESHOLD {
+                    if let Err(e) = db.upsert_ranking(wechat_openid).await {
+                        error!("error recording ranking: {}", e);
+                        return (StatusCode::INTERNAL_SERVER_ERROR, "error recording ranking")
+                            .into_response();
+                    }
+                }
                 Json(data).into_response()
             }
             Err(e) => {

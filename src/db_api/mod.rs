@@ -2,6 +2,7 @@ pub mod ducks;
 pub mod exhibits;
 pub mod locations;
 pub mod public;
+pub mod rankings;
 
 use crate::prisma::{new_client_with_url, PrismaClient};
 use serde::{Deserialize, Serialize};

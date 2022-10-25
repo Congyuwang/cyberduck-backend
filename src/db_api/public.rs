@@ -17,6 +17,9 @@ user::select! { user_info {
     id
     created_at
     wechat_open_id
+    ranking: select {
+        ranking
+    }
     duck_history: select {
         created_at
         duck: select {
