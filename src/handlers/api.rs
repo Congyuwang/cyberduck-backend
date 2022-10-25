@@ -1,3 +1,4 @@
+use crate::db_api::public::user_info;
 use crate::wechat_login::CodeResponse;
 use crate::{DB, SERVER_CONFIG};
 use axum::extract::{Path, Query};
@@ -154,16 +155,24 @@ pub async fn find_duck(
             .record_duck_view(wechat_openid.clone(), duck_id.clone())
             .await
         {
-            Ok(data) => {
+            Ok(mut data) => {
                 info!(
                     "user (openid: {}) find duck (duck_id: {})",
                     wechat_openid, duck_id
                 );
                 if data.duck_history.len() == DUCK_COUNT_THRESHOLD {
-                    if let Err(e) = db.upsert_ranking(wechat_openid).await {
-                        error!("error recording ranking: {}", e);
-                        return (StatusCode::INTERNAL_SERVER_ERROR, "error recording ranking")
-                            .into_response();
+                    match db.upsert_ranking(wechat_openid).await {
+                        Err(e) => {
+                            error!("error recording ranking: {}", e);
+                            return (StatusCode::INTERNAL_SERVER_ERROR, "error recording ranking")
+                                .into_response();
+                        }
+                        // add ranking info
+                        Ok(history) => {
+                            data.ranking = Some(user_info::ranking::Data {
+                                ranking: history.ranking,
+                            });
+                        }
                     }
                 }
                 Json(data).into_response()
