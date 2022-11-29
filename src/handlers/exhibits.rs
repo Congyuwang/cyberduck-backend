@@ -1,9 +1,9 @@
 use crate::db_api::exhibits::{NewExhibitData, UpdateExhibitData};
 use crate::{DB, SERVER_CONFIG};
-use axum::extract::Path;
+use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum::{Extension, Json};
+use axum::Json;
 use axum_auth::AuthBearer;
 use serde_json::json;
 use tracing::error;
@@ -11,7 +11,7 @@ use tracing::error;
 /// POST admin/exhibit
 pub async fn create_exhibit(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Json(data): Json<NewExhibitData>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -30,7 +30,7 @@ pub async fn create_exhibit(
 /// GET admin/exhibit/:id
 pub async fn get_exhibit(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Path(exhibit_id): Path<String>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -50,7 +50,7 @@ pub async fn get_exhibit(
 /// PATCH admin/exhibit/:id
 pub async fn update_exhibit(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Path(exhibit_id): Path<String>,
     Json(data): Json<UpdateExhibitData>,
 ) -> Response {
@@ -70,7 +70,7 @@ pub async fn update_exhibit(
 /// DELETE admin/exhibit/:id
 pub async fn delete_exhibit(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Path(exhibit_id): Path<String>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -89,7 +89,7 @@ pub async fn delete_exhibit(
 /// POST admin/many-exhibits
 pub async fn create_many_exhibits(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Json(data): Json<Vec<NewExhibitData>>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -109,10 +109,7 @@ pub async fn create_many_exhibits(
 }
 
 /// GET admin/many-exhibits
-pub async fn get_all_exhibits(
-    AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
-) -> Response {
+pub async fn get_all_exhibits(AuthBearer(token): AuthBearer, State(db): State<DB>) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
         match db.get_all_exhibits().await {
             Ok(rsp) => Json(rsp).into_response(),
@@ -127,10 +124,7 @@ pub async fn get_all_exhibits(
 }
 
 /// DELETE admin/dangerous/many-exhibits
-pub async fn delete_all_exhibits(
-    AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
-) -> Response {
+pub async fn delete_all_exhibits(AuthBearer(token): AuthBearer, State(db): State<DB>) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
         match db.delete_all_exhibits().await {
             Ok(rsp) => Json(json!({

@@ -10,7 +10,7 @@ use crate::handlers::{api, ducks, exhibits, locations, rankings};
 use anyhow::Result;
 use axum::response::{IntoResponse, Response};
 use axum::routing::{delete, get, get_service, post};
-use axum::{Extension, Router};
+use axum::Router;
 use axum_server::tls_rustls::RustlsConfig;
 use configuration::Configuration;
 use http::{HeaderValue, Method, StatusCode};
@@ -125,12 +125,12 @@ async fn main() -> Result<()> {
         .nest("/api", api)
         .route("/login", get(api::login))
         .route(callback_path, get(api::login_callback))
-        .fallback(
+        .fallback_service(
             // serve static files
             get_service(ServeDir::new("public"))
                 .handle_error(|_| async move { internal_error("static file error") }),
         )
-        .layer(Extension(db))
+        .with_state(db)
         .layer(session);
 
     // start listening

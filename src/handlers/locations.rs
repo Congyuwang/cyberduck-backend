@@ -1,9 +1,9 @@
 use crate::db_api::locations::{NewLocationData, UpdateLocationData};
 use crate::{DB, SERVER_CONFIG};
-use axum::extract::Path;
+use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum::{Extension, Json};
+use axum::Json;
 use axum_auth::AuthBearer;
 use serde_json::json;
 use tracing::error;
@@ -11,7 +11,7 @@ use tracing::error;
 /// POST admin/location
 pub async fn create_location(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Json(data): Json<NewLocationData>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -30,7 +30,7 @@ pub async fn create_location(
 /// GET admin/location/:id
 pub async fn get_location(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Path(location_id): Path<String>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -50,7 +50,7 @@ pub async fn get_location(
 /// PATCH admin/location/:id
 pub async fn update_location(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Path(location_id): Path<String>,
     Json(data): Json<UpdateLocationData>,
 ) -> Response {
@@ -70,7 +70,7 @@ pub async fn update_location(
 /// DELETE admin/location/:id
 pub async fn delete_location(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Path(location_id): Path<String>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -89,7 +89,7 @@ pub async fn delete_location(
 /// POST admin/many-locations
 pub async fn create_many_locations(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Json(data): Json<Vec<NewLocationData>>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -113,10 +113,7 @@ pub async fn create_many_locations(
 }
 
 /// GET admin/many-locations
-pub async fn get_all_locations(
-    AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
-) -> Response {
+pub async fn get_all_locations(AuthBearer(token): AuthBearer, State(db): State<DB>) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
         match db.get_all_locations().await {
             Ok(rsp) => Json(rsp).into_response(),
@@ -131,10 +128,7 @@ pub async fn get_all_locations(
 }
 
 /// DELETE admin/dangerous/many-locations
-pub async fn delete_all_locations(
-    AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
-) -> Response {
+pub async fn delete_all_locations(AuthBearer(token): AuthBearer, State(db): State<DB>) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
         match db.delete_all_locations().await {
             Ok(rsp) => Json(json!({

@@ -1,10 +1,10 @@
 use crate::db_api::public::user_info;
 use crate::wechat_login::CodeResponse;
 use crate::{DB, SERVER_CONFIG};
-use axum::extract::{Path, Query};
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Redirect, Response};
-use axum::{Extension, Json};
+use axum::Json;
 use axum_database_sessions::{AxumRedisPool, AxumSession};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -33,15 +33,13 @@ pub async fn login(session: Session, Query(login_params): Query<LoginParams>) ->
     if check_login(&session).await.is_none() {
         // already logged in
         let (state, redirect) = SERVER_CONFIG.wechat.auth_url();
-        session
-            .set(
-                LOGIN_STATE_KEY,
-                LoginState {
-                    state,
-                    redirect_url: login_params.redirect_url,
-                },
-            )
-            .await;
+        session.set(
+            LOGIN_STATE_KEY,
+            LoginState {
+                state,
+                redirect_url: login_params.redirect_url,
+            },
+        );
         Redirect::to(redirect.as_str())
     } else {
         Redirect::to(login_params.redirect_url.as_str())
@@ -59,8 +57,8 @@ pub async fn login_callback(
     session: Session,
     Query(login_callback_params): Query<LoginCallbackParams>,
 ) -> Response {
-    if let Some(state) = session.get::<LoginState>(LOGIN_STATE_KEY).await {
-        session.remove(LOGIN_STATE_KEY).await;
+    if let Some(state) = session.get::<LoginState>(LOGIN_STATE_KEY) {
+        session.remove(LOGIN_STATE_KEY);
         if login_callback_params.state.eq(&state.state) {
             match SERVER_CONFIG
                 .wechat
@@ -69,7 +67,7 @@ pub async fn login_callback(
             {
                 Ok(rsp) => match rsp {
                     CodeResponse::Success { openid, .. } => {
-                        session.set(WECHAT_ID_KEY, &openid).await;
+                        session.set(WECHAT_ID_KEY, &openid);
                         info!("login success from openid: {}", openid);
                         Redirect::to(state.redirect_url.as_str()).into_response()
                     }
@@ -104,7 +102,7 @@ pub async fn login_callback(
 }
 
 /// GET api/user-info
-pub async fn user_info(session: Session, Extension(db): Extension<DB>) -> Response {
+pub async fn user_info(session: Session, State(db): State<DB>) -> Response {
     if let Some(wechat_openid) = check_login(&session).await {
         match db.upsert_user_info(wechat_openid.clone()).await {
             Ok(data) => {
@@ -126,7 +124,7 @@ pub async fn user_info(session: Session, Extension(db): Extension<DB>) -> Respon
 }
 
 /// DELETE api/user-info
-pub async fn clear_history(session: Session, Extension(db): Extension<DB>) -> Response {
+pub async fn clear_history(session: Session, State(db): State<DB>) -> Response {
     if let Some(wechat_openid) = check_login(&session).await {
         match db.delete_duck_history(wechat_openid).await {
             Ok(n) => Json(json!({ "number_of_records_removed": n })).into_response(),
@@ -147,7 +145,7 @@ pub async fn clear_history(session: Session, Extension(db): Extension<DB>) -> Re
 /// GET api/find-duck/:duck_id
 pub async fn find_duck(
     session: Session,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Path(duck_id): Path<String>,
 ) -> Response {
     if let Some(wechat_openid) = check_login(&session).await {
@@ -188,7 +186,7 @@ pub async fn find_duck(
 }
 
 /// GET api/preview-ducks
-pub async fn preview_ducks(Extension(db): Extension<DB>) -> Response {
+pub async fn preview_ducks(State(db): State<DB>) -> Response {
     match db.preview_ducks().await {
         Ok(data) => Json(data).into_response(),
         Err(e) => {
@@ -199,5 +197,5 @@ pub async fn preview_ducks(Extension(db): Extension<DB>) -> Response {
 }
 
 async fn check_login(session: &Session) -> Option<String> {
-    session.get::<String>(WECHAT_ID_KEY).await
+    session.get::<String>(WECHAT_ID_KEY)
 }

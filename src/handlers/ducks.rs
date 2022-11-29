@@ -1,9 +1,9 @@
 use crate::db_api::ducks::{NewDuckData, UpdateDuckData};
 use crate::{DB, SERVER_CONFIG};
-use axum::extract::{Path, Query};
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum::{Extension, Json};
+use axum::Json;
 use axum_auth::AuthBearer;
 use serde::Deserialize;
 use serde_json::json;
@@ -12,7 +12,7 @@ use tracing::error;
 /// POST admin/duck
 pub async fn create_duck(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Json(data): Json<NewDuckData>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -31,7 +31,7 @@ pub async fn create_duck(
 /// GET admin/duck/:id
 pub async fn get_duck(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Path(duck_id): Path<String>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -51,7 +51,7 @@ pub async fn get_duck(
 /// PATCH admin/duck/:id
 pub async fn update_duck(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Path(duck_id): Path<String>,
     Json(data): Json<UpdateDuckData>,
 ) -> Response {
@@ -71,7 +71,7 @@ pub async fn update_duck(
 /// DELETE admin/duck/:id
 pub async fn delete_duck(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Path(duck_id): Path<String>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -90,7 +90,7 @@ pub async fn delete_duck(
 /// POST admin/many-ducks
 pub async fn create_many_ducks(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Json(data): Json<Vec<NewDuckData>>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -110,10 +110,7 @@ pub async fn create_many_ducks(
 }
 
 /// GET admin/many-ducks
-pub async fn get_all_ducks(
-    AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
-) -> Response {
+pub async fn get_all_ducks(AuthBearer(token): AuthBearer, State(db): State<DB>) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
         match db.get_all_ducks().await {
             Ok(rsp) => Json(rsp).into_response(),
@@ -135,7 +132,7 @@ pub struct DeleteDuckHistoryParam {
 /// DELETE admin/duck-history/dangerous?user_id=USER_ID
 pub async fn delete_duck_history(
     AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
+    State(db): State<DB>,
     Query(params): Query<DeleteDuckHistoryParam>,
 ) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
@@ -159,10 +156,7 @@ pub async fn delete_duck_history(
 }
 
 /// DELETE admin/dangerous/many-ducks
-pub async fn delete_all_ducks(
-    AuthBearer(token): AuthBearer,
-    Extension(db): Extension<DB>,
-) -> Response {
+pub async fn delete_all_ducks(AuthBearer(token): AuthBearer, State(db): State<DB>) -> Response {
     if token.eq(&SERVER_CONFIG.admin_token) {
         match db.delete_all_ducks().await {
             Ok(rsp) => Json(json!({

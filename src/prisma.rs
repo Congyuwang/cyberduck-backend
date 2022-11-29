@@ -7332,23 +7332,23 @@ pub mod _prisma {
             let url = match self.url {
                 Some(url) => url,
                 None => {
-                    if let Some(url) = source.load_shadow_database_url()? {
+                    let url = if let Some(url) = source.load_shadow_database_url()? {
                         url
                     } else {
                         source.load_url(|key| std::env::var(key).ok())?
+                    };
+                    match url.starts_with("file:") {
+                        true => {
+                            let path = url.split(":").nth(1).unwrap();
+                            if std::path::Path::new("./prisma/schema.prisma").exists() {
+                                format!("file:./prisma/{}", path)
+                            } else {
+                                url
+                            }
+                        }
+                        _ => url,
                     }
                 }
-            };
-            let url = match url.starts_with("file:") {
-                true => {
-                    let path = url.split(":").nth(1).unwrap();
-                    if std::path::Path::new("./prisma/schema.prisma").exists() {
-                        format!("file:./prisma/{}", path)
-                    } else {
-                        url
-                    }
-                }
-                _ => url,
             };
             let (db_name, executor) =
                 ::prisma_client_rust::query_core::executor::load(&source, &[], &url).await?;
