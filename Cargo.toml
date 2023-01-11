@@ -19,7 +19,7 @@ time = "=0.1.44"
 base64 = "0.13"
 serde_json = "1"
 url = { version = "2", features = ["serde"] }
-axum-auth = { git = "https://github.com/Congyuwang/axum-auth" }
+axum-auth = "0.4"
 rand = "0.8.5"
 reqwest = { version = "0.11.12", features = ["json"] }
 tower-http = { version = "0.3.4", features = ["cors", "fs"] }
@@ -27,7 +27,7 @@ http = "0.2.8"
 
 [dependencies.prisma-client-rust]
 git = "https://github.com/Brendonovich/prisma-client-rust"
-tag = "0.6.3"
+tag = "0.6.4"
 default-features=false
 features=["mongodb"]
 

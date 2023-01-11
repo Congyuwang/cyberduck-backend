@@ -1,5 +1,6 @@
 //! admin api to manage ducks
 use crate::db_api::{Bilingual, DB};
+use crate::prisma::read_filters::StringFilter;
 use crate::prisma::{duck, duck_history, exhibit, location, user};
 use serde::Deserialize;
 
@@ -225,7 +226,9 @@ impl DB {
         let data = self
             .0
             .duck_history()
-            .delete_many(vec![duck_history::WhereParam::UserIdEquals(user_id)])
+            .delete_many(vec![duck_history::WhereParam::UserId(
+                StringFilter::Equals(user_id),
+            )])
             .exec()
             .await?;
         Ok(data)
